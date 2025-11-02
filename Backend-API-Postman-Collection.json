@@ -1,0 +1,1158 @@
+{
+	"info": {
+		"_postman_id": "backend-api-collection",
+		"name": "Backend API - Dashboard de Facturas",
+		"description": "Collection completa para probar todos los endpoints de la API de Dashboard de Facturas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "🔐 Autenticación",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@empresa.com\",\n  \"password\": \"Admin123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Iniciar sesión y obtener token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Perfil",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Obtener perfil del usuario autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Verificar Token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/verify",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"verify"
+							]
+						},
+						"description": "Verificar si el token es válido"
+					},
+					"response": []
+				},
+				{
+					"name": "Cambiar Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"Admin123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"change-password"
+							]
+						},
+						"description": "Cambiar contraseña del usuario autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Cerrar sesión e invalidar token"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Usuario (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"email\": \"juan.perez@empresa.com\",\n  \"password\": \"Password123!\",\n  \"rol\": \"usuario\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"users"
+							]
+						},
+						"description": "Crear nuevo usuario (solo administradores)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de autenticación y gestión de usuarios"
+		},
+		{
+			"name": "📊 Dashboard",
+			"item": [
+				{
+					"name": "Overview",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/overview",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"overview"
+							]
+						},
+						"description": "Métricas generales del dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Métricas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/metrics?fechaInicio=2024-01-01&fechaFin=2024-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"metrics"
+							],
+							"query": [
+								{
+									"key": "fechaInicio",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2024-12-31"
+								}
+							]
+						},
+						"description": "Métricas con filtros opcionales"
+					},
+					"response": []
+				},
+				{
+					"name": "Gráficos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/charts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"charts"
+							]
+						},
+						"description": "Datos para gráficos del dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Alertas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/alertas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"alertas"
+							]
+						},
+						"description": "Alertas del sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Performance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/performance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"performance"
+							]
+						},
+						"description": "Estadísticas de rendimiento"
+					},
+					"response": []
+				},
+				{
+					"name": "Datos Completos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/data",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"data"
+							]
+						},
+						"description": "Todos los datos del dashboard"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints del dashboard y métricas"
+		},
+		{
+			"name": "📄 Facturas",
+			"item": [
+				{
+					"name": "Listar Facturas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas?page=1&limit=25&estado=procesado&fechaInicio=2024-01-01&fechaFin=2024-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "25"
+								},
+								{
+									"key": "estado",
+									"value": "procesado"
+								},
+								{
+									"key": "fechaInicio",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2024-12-31"
+								}
+							]
+						},
+						"description": "Lista de facturas con filtros y paginación"
+					},
+					"response": []
+				},
+				{
+					"name": "Búsqueda de Facturas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/search?search=factura&estado=procesado&page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"search"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "factura"
+								},
+								{
+									"key": "estado",
+									"value": "procesado"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Búsqueda avanzada de facturas"
+					},
+					"response": []
+				},
+				{
+					"name": "Sugerencias",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/suggestions?q=fact",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"suggestions"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "fact"
+								}
+							]
+						},
+						"description": "Sugerencias para búsqueda"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Factura por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/{{factura_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"{{factura_id}}"
+							]
+						},
+						"description": "Detalle de factura por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Items de Factura",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/{{factura_id}}/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"{{factura_id}}",
+								"items"
+							]
+						},
+						"description": "Items de una factura específica"
+					},
+					"response": []
+				},
+				{
+					"name": "Archivos de Factura",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/{{factura_id}}/archivos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"{{factura_id}}",
+								"archivos"
+							]
+						},
+						"description": "Archivos asociados a una factura"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Estado",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"estado\": \"revisado\",\n  \"comentario\": \"Factura revisada y aprobada\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/{{factura_id}}/estado",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"{{factura_id}}",
+								"estado"
+							]
+						},
+						"description": "Actualizar estado de factura"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Factura",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/facturas/{{factura_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"facturas",
+								"{{factura_id}}"
+							]
+						},
+						"description": "Eliminar factura (soft delete)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de facturas"
+		},
+		{
+			"name": "🏢 Emisores",
+			"item": [
+				{
+					"name": "Listar Emisores",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/emisores?page=1&limit=25",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"emisores"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "25"
+								}
+							]
+						},
+						"description": "Lista de emisores con estadísticas"
+					},
+					"response": []
+				},
+				{
+					"name": "Top Emisores",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/emisores/top?limit=10&metric=facturas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"emisores",
+								"top"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "metric",
+									"value": "facturas"
+								}
+							]
+						},
+						"description": "Top emisores por métrica"
+					},
+					"response": []
+				},
+				{
+					"name": "Emisor por RUC",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/emisores/{{emisor_ruc}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"emisores",
+								"{{emisor_ruc}}"
+							]
+						},
+						"description": "Detalle de emisor por RUC"
+					},
+					"response": []
+				},
+				{
+					"name": "Facturas por Emisor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/emisores/{{emisor_ruc}}/facturas?page=1&limit=25",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"emisores",
+								"{{emisor_ruc}}",
+								"facturas"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "25"
+								}
+							]
+						},
+						"description": "Facturas de un emisor específico"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de emisores"
+		},
+		{
+			"name": "📈 Reportes",
+			"item": [
+				{
+					"name": "Dashboard de Reportes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reportes/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reportes",
+								"dashboard"
+							]
+						},
+						"description": "Dashboard de reportes"
+					},
+					"response": []
+				},
+				{
+					"name": "Reporte de Ventas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reportes/ventas?fechaInicio=2024-01-01&fechaFin=2024-12-31&formato=json",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reportes",
+								"ventas"
+							],
+							"query": [
+								{
+									"key": "fechaInicio",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "formato",
+									"value": "json"
+								}
+							]
+						},
+						"description": "Reporte de ventas por período"
+					},
+					"response": []
+				},
+				{
+					"name": "Reporte ITBMS",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reportes/itbms?mes=12&año=2024",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reportes",
+								"itbms"
+							],
+							"query": [
+								{
+									"key": "mes",
+									"value": "12"
+								},
+								{
+									"key": "año",
+									"value": "2024"
+								}
+							]
+						},
+						"description": "Reporte de ITBMS"
+					},
+					"response": []
+				},
+				{
+					"name": "Performance OCR",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reportes/ocr-performance?fechaInicio=2024-01-01&fechaFin=2024-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reportes",
+								"ocr-performance"
+							],
+							"query": [
+								{
+									"key": "fechaInicio",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2024-12-31"
+								}
+							]
+						},
+						"description": "Reporte de performance del OCR"
+					},
+					"response": []
+				},
+				{
+					"name": "Actividad Emisores",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reportes/actividad-emisores?periodo=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reportes",
+								"actividad-emisores"
+							],
+							"query": [
+								{
+									"key": "periodo",
+									"value": "30"
+								}
+							]
+						},
+						"description": "Reporte de actividad de emisores"
+					},
+					"response": []
+				},
+				{
+					"name": "Exportar Datos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo\": \"facturas\",\n  \"formato\": \"csv\",\n  \"filtros\": {\n    \"fechaInicio\": \"2024-01-01\",\n    \"fechaFin\": \"2024-12-31\",\n    \"estado\": \"procesado\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/reportes/export",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reportes",
+								"export"
+							]
+						},
+						"description": "Exportar datos (JSON/CSV)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de reportes y exportación"
+		},
+		{
+			"name": "🔍 Búsqueda",
+			"item": [
+				{
+					"name": "Búsqueda de Facturas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/busqueda/facturas?q=factura&estado=procesado&page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"busqueda",
+								"facturas"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "factura"
+								},
+								{
+									"key": "estado",
+									"value": "procesado"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Búsqueda de facturas"
+					},
+					"response": []
+				},
+				{
+					"name": "Sugerencias de Búsqueda",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/busqueda/suggestions?q=fact",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"busqueda",
+								"suggestions"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "fact"
+								}
+							]
+						},
+						"description": "Sugerencias de búsqueda"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de búsqueda y sugerencias"
+		},
+		{
+			"name": "📚 Documentación",
+			"item": [
+				{
+					"name": "API Documentation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/docs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"docs"
+							]
+						},
+						"description": "Documentación completa de la API"
+					},
+					"response": []
+				}
+			],
+			"description": "Documentación de la API"
+		},
+		{
+			"name": "🏥 Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Verificar estado del servidor"
+					},
+					"response": []
+				}
+			],
+			"description": "Verificación de estado del servidor"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "factura_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "emisor_ruc",
+			"value": "12345678901",
+			"type": "string"
+		}
+	]
+} 
