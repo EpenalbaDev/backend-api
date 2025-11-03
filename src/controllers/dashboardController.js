@@ -5,7 +5,12 @@ class DashboardController {
   // Obtener overview general del dashboard
   async getOverview(req, res, next) {
     try {
-      const overview = await dashboardService.getOverview();
+      // Aplicar filtro multi-tenant desde middleware
+      const filtros = {};
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        filtros.empresa_id = req.empresaFilter.empresa_id;
+      }
+      const overview = await dashboardService.getOverview(filtros);
 
       res.json({
         success: true,
@@ -36,6 +41,10 @@ class DashboardController {
         });
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const metrics = await dashboardService.getMetrics(value);
 
       res.json({
@@ -52,7 +61,12 @@ class DashboardController {
   // Obtener datos para gráficos
   async getCharts(req, res, next) {
     try {
-      const charts = await dashboardService.getCharts();
+      // Aplicar filtro multi-tenant desde middleware
+      const filtros = {};
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        filtros.empresa_id = req.empresaFilter.empresa_id;
+      }
+      const charts = await dashboardService.getCharts(filtros);
 
       res.json({
         success: true,

@@ -175,6 +175,71 @@ class AuthController {
       next(error);
     }
   }
+
+  // Registro público de nuevos clientes
+  async register(req, res, next) {
+    try {
+      const schema = Joi.object({
+        nombre: Joi.string().min(2).max(100).required().messages({
+          'string.min': 'Nombre debe tener al menos 2 caracteres',
+          'any.required': 'Nombre es requerido'
+        }),
+        apellido: Joi.string().min(2).max(100).required().messages({
+          'string.min': 'Apellido debe tener al menos 2 caracteres',
+          'any.required': 'Apellido es requerido'
+        }),
+        email: Joi.string().email().required().messages({
+          'string.email': 'Formato de email inválido',
+          'any.required': 'Email es requerido'
+        }),
+        password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).required().messages({
+          'string.min': 'Password debe tener al menos 8 caracteres',
+          'string.pattern.base': 'Password debe contener al menos una mayúscula, una minúscula y un número',
+          'any.required': 'Password es requerido'
+        }),
+        empresa_nombre: Joi.string().min(2).max(255).required().messages({
+          'string.min': 'El nombre de la empresa debe tener al menos 2 caracteres',
+          'any.required': 'El nombre de la empresa es requerido'
+        }),
+        empresa_ruc: Joi.string().min(8).max(50).required().messages({
+          'string.min': 'El RUC debe tener al menos 8 caracteres',
+          'any.required': 'El RUC es requerido'
+        }),
+        empresa_direccion: Joi.string().max(500).optional().allow(null, ''),
+        empresa_telefono: Joi.string().max(50).optional().allow(null, '')
+      });
+
+      const { error, value } = schema.validate(req.body);
+      
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: error.details[0].message
+        });
+      }
+
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.get('User-Agent');
+
+      const result = await authService.register(value, ipAddress, userAgent);
+
+      res.status(201).json({
+        success: true,
+        message: 'Registro exitoso. Empresa y usuario creados.',
+        data: result
+      });
+
+    } catch (error) {
+      if (error.message === 'El email ya está registrado' || 
+          error.message === 'El RUC ya está registrado') {
+        return res.status(409).json({
+          success: false,
+          message: error.message
+        });
+      }
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();

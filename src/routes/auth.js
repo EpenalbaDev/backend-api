@@ -6,6 +6,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 
 // Rutas públicas (no requieren autenticación)
 router.post('/login', rateLimiter.auth, authController.login);
+router.post('/register', rateLimiter.register, authController.register);
 
 // Rutas protegidas (requieren autenticación)
 router.get('/me', authenticateToken, authController.getProfile);

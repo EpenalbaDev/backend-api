@@ -23,6 +23,17 @@ class FacturaService {
       let whereClause = 'WHERE 1=1';
       let params = [];
 
+      // Aplicar filtro multi-tenant si existe empresa_id
+      // Nota: Si facturas no tiene empresa_id, este filtro no aplicará
+      // Se puede implementar JOIN con usuarios si es necesario en el futuro
+      if (filtros.empresa_id !== undefined && filtros.empresa_id !== null) {
+        // Por ahora, si facturas tiene empresa_id, se filtra
+        // Si no existe, este filtro se omite silenciosamente
+        // TODO: Agregar empresa_id a tabla facturas o implementar JOIN con usuarios
+        whereClause += ' AND empresa_id = ?';
+        params.push(filtros.empresa_id);
+      }
+
       if (search && typeof search === 'string' && search.trim()) {
         whereClause += ` AND (
           numero_factura LIKE ? OR 

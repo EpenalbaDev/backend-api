@@ -41,8 +41,22 @@ const sensitiveLimiter = rateLimit({
   legacyHeaders: false
 });
 
+// Rate limiter para registro público (5 requests/hour)
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  limit: 5, // 5 registros por hora por IP
+  message: {
+    success: false,
+    message: 'Demasiados intentos de registro desde esta IP. Intenta en una hora.'
+  },
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  skipSuccessfulRequests: false // Contar todos los requests
+});
+
 module.exports = {
   global: globalLimiter,
   auth: authLimiter,
-  sensitive: sensitiveLimiter
+  sensitive: sensitiveLimiter,
+  register: registerLimiter
 };

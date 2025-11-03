@@ -49,6 +49,10 @@ class ReporteController {
         });
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const reporte = await reporteService.getDashboardReportes(value);
 
       res.json({
@@ -81,6 +85,10 @@ class ReporteController {
         });
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const reporte = await reporteService.getReporteVentas(value);
 
       // Manejar diferentes formatos de respuesta
@@ -149,6 +157,10 @@ class ReporteController {
         value.fechaFin = fechaFin.toISOString().split('T')[0];
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const reporte = await reporteService.getReporteITBMS(value);
 
       // Manejar diferentes formatos de respuesta
@@ -211,6 +223,10 @@ class ReporteController {
         });
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const reporte = await reporteService.getReportePerformanceOCR(value);
 
       res.json({
@@ -253,6 +269,10 @@ class ReporteController {
         value.fechaFin = fechaFin.toISOString().split('T')[0];
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const reporte = await reporteService.getReporteActividadEmisores(value);
 
       // Manejar diferentes formatos de respuesta
@@ -317,6 +337,10 @@ class ReporteController {
         });
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const resultado = await reporteService.exportarDatos(value);
 
       // Configurar headers para descarga

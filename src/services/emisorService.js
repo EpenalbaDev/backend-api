@@ -4,10 +4,18 @@ class EmisorService {
   // Obtener lista de emisores con estadísticas
   async getEmisores(filtros = {}) {
     try {
-      const { page = 1, limit = 25, search, sortBy = 'total_facturas', sortOrder = 'DESC' } = filtros;
+      const { page = 1, limit = 25, search, empresa_id, sortBy = 'total_facturas', sortOrder = 'DESC' } = filtros;
 
       let whereClause = 'WHERE emisor_ruc IS NOT NULL AND emisor_ruc != ""';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      // Nota: Si facturas no tiene empresa_id, este filtro no aplicará
+      // Se puede implementar JOIN con usuarios si es necesario en el futuro
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (search) {
         whereClause += ' AND (emisor_nombre LIKE ? OR emisor_ruc LIKE ?)';

@@ -4,10 +4,16 @@ class ReporteService {
   // Reporte de dashboard
   async getDashboardReportes(filtros = {}) {
     try {
-      const { fechaInicio, fechaFin, emisorRuc } = filtros;
+      const { fechaInicio, fechaFin, emisorRuc, empresa_id } = filtros;
 
       let whereClause = 'WHERE 1=1';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (fechaInicio) {
         whereClause += ' AND fecha_factura >= ?';
@@ -102,10 +108,16 @@ class ReporteService {
   // Reporte de ventas por período
   async getReporteVentas(filtros = {}) {
     try {
-      const { fechaInicio, fechaFin, emisorRuc, agruparPor = 'mes' } = filtros;
+      const { fechaInicio, fechaFin, emisorRuc, empresa_id, agruparPor = 'mes' } = filtros;
 
       let whereClause = 'WHERE 1=1';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (fechaInicio) {
         whereClause += ' AND fecha_factura >= ?';
@@ -219,10 +231,16 @@ class ReporteService {
   // Reporte de ITBMS
   async getReporteITBMS(filtros = {}) {
     try {
-      const { fechaInicio, fechaFin, emisorRuc } = filtros;
+      const { fechaInicio, fechaFin, emisorRuc, empresa_id } = filtros;
 
       let whereClause = 'WHERE itbms > 0';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (fechaInicio) {
         whereClause += ' AND fecha_factura >= ?';
@@ -321,10 +339,16 @@ class ReporteService {
   // Reporte de performance del OCR
   async getReportePerformanceOCR(filtros = {}) {
     try {
-      const { fechaInicio, fechaFin } = filtros;
+      const { fechaInicio, fechaFin, empresa_id } = filtros;
 
       let whereClause = 'WHERE confianza_ocr IS NOT NULL';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (fechaInicio) {
         whereClause += ' AND created_at >= ?';
@@ -417,10 +441,16 @@ class ReporteService {
   // Reporte de actividad de emisores
   async getReporteActividadEmisores(filtros = {}) {
     try {
-      const { fechaInicio, fechaFin, limit = 50 } = filtros;
+      const { fechaInicio, fechaFin, empresa_id, limit = 50 } = filtros;
 
       let whereClause = 'WHERE emisor_ruc IS NOT NULL AND emisor_ruc != ""';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (fechaInicio) {
         whereClause += ' AND fecha_factura >= ?';
@@ -504,23 +534,23 @@ class ReporteService {
   // Exportar datos
   async exportarDatos(filtros) {
     try {
-      const { tipo, formato, fechaInicio, fechaFin, emisorRuc } = filtros;
+      const { tipo, formato, fechaInicio, fechaFin, emisorRuc, empresa_id } = filtros;
 
       let datos = [];
 
       switch (tipo) {
         case 'facturas':
-          datos = await this.exportarFacturas({ fechaInicio, fechaFin, emisorRuc });
+          datos = await this.exportarFacturas({ fechaInicio, fechaFin, emisorRuc, empresa_id });
           break;
         case 'emisores':
-          datos = await this.exportarEmisores({ fechaInicio, fechaFin });
+          datos = await this.exportarEmisores({ fechaInicio, fechaFin, empresa_id });
           break;
         case 'ventas':
-          const reporteVentas = await this.getReporteVentas({ fechaInicio, fechaFin, emisorRuc });
+          const reporteVentas = await this.getReporteVentas({ fechaInicio, fechaFin, emisorRuc, empresa_id });
           datos = reporteVentas.detalle;
           break;
         case 'itbms':
-          const reporteITBMS = await this.getReporteITBMS({ fechaInicio, fechaFin, emisorRuc });
+          const reporteITBMS = await this.getReporteITBMS({ fechaInicio, fechaFin, emisorRuc, empresa_id });
           datos = reporteITBMS.por_emisor;
           break;
         default:
@@ -544,10 +574,16 @@ class ReporteService {
 
   // Métodos auxiliares para exportación
   async exportarFacturas(filtros) {
-    const { fechaInicio, fechaFin, emisorRuc, estado } = filtros;
+    const { fechaInicio, fechaFin, emisorRuc, estado, empresa_id } = filtros;
     
     let whereClause = 'WHERE 1=1';
     let params = [];
+
+    // Aplicar filtro multi-tenant si existe empresa_id
+    if (empresa_id !== undefined && empresa_id !== null) {
+      whereClause += ' AND empresa_id = ?';
+      params.push(empresa_id);
+    }
 
     if (fechaInicio) {
       whereClause += ' AND fecha_factura >= ?';
@@ -590,10 +626,16 @@ class ReporteService {
   }
 
   async exportarEmisores(filtros) {
-    const { fechaInicio, fechaFin } = filtros;
+    const { fechaInicio, fechaFin, empresa_id } = filtros;
     
     let whereClause = 'WHERE emisor_ruc IS NOT NULL AND emisor_ruc != ""';
     let params = [];
+
+    // Aplicar filtro multi-tenant si existe empresa_id
+    if (empresa_id !== undefined && empresa_id !== null) {
+      whereClause += ' AND empresa_id = ?';
+      params.push(empresa_id);
+    }
 
     if (fechaInicio) {
       whereClause += ' AND fecha_factura >= ?';

@@ -2,32 +2,42 @@ const { executeQuery } = require('../config/database');
 
 class DashboardService {
   // Obtener métricas generales (overview)
-  async getOverview() {
+  async getOverview(filtros = {}) {
     try {
+      // Construir filtro WHERE para multi-tenant
+      let whereClause = '';
+      const params = [];
+      if (filtros.empresa_id !== undefined && filtros.empresa_id !== null) {
+        whereClause = 'WHERE empresa_id = ?';
+        params.push(filtros.empresa_id);
+      }
+
       // Métricas principales
       const [totalFacturas] = await executeQuery(`
-        SELECT COUNT(*) as count FROM facturas
-      `);
+        SELECT COUNT(*) as count FROM facturas ${whereClause}
+      `, params);
 
+      const fechaWhere = whereClause ? `${whereClause} AND` : 'WHERE';
       const [facturasMesActual] = await executeQuery(`
         SELECT COUNT(*) as count FROM facturas 
-        WHERE MONTH(fecha_factura) = MONTH(CURRENT_DATE()) 
+        ${fechaWhere} MONTH(fecha_factura) = MONTH(CURRENT_DATE()) 
         AND YEAR(fecha_factura) = YEAR(CURRENT_DATE())
-      `);
+      `, params);
 
       const [totalMonto] = await executeQuery(`
-        SELECT COALESCE(SUM(total), 0) as sum FROM facturas
-      `);
+        SELECT COALESCE(SUM(total), 0) as sum FROM facturas ${whereClause}
+      `, params);
 
       const [montoMesActual] = await executeQuery(`
         SELECT COALESCE(SUM(total), 0) as sum FROM facturas 
-        WHERE MONTH(fecha_factura) = MONTH(CURRENT_DATE()) 
+        ${fechaWhere} MONTH(fecha_factura) = MONTH(CURRENT_DATE()) 
         AND YEAR(fecha_factura) = YEAR(CURRENT_DATE())
-      `);
+      `, params);
 
+      const promedioWhere = whereClause ? `${whereClause} AND total > 0` : 'WHERE total > 0';
       const [promedioFactura] = await executeQuery(`
-        SELECT COALESCE(AVG(total), 0) as avg FROM facturas WHERE total > 0
-      `);
+        SELECT COALESCE(AVG(total), 0) as avg FROM facturas ${promedioWhere}
+      `, params);
 
       const [facturasPorEstado] = await executeQuery(`
         SELECT 
@@ -35,17 +45,19 @@ class DashboardService {
           COUNT(CASE WHEN estado = 'procesado' THEN 1 END) as procesadas,
           COUNT(CASE WHEN estado = 'error' THEN 1 END) as errores,
           COUNT(CASE WHEN estado = 'revisado' THEN 1 END) as revisadas
-        FROM facturas
-      `);
+        FROM facturas ${whereClause}
+      `, params);
 
+      const confianzaWhere = whereClause ? `${whereClause} AND confianza_ocr IS NOT NULL` : 'WHERE confianza_ocr IS NOT NULL';
       const [confianzaPromedio] = await executeQuery(`
-        SELECT COALESCE(AVG(confianza_ocr), 0) as avg FROM facturas WHERE confianza_ocr IS NOT NULL
-      `);
+        SELECT COALESCE(AVG(confianza_ocr), 0) as avg FROM facturas ${confianzaWhere}
+      `, params);
 
+      const emisoresWhere = whereClause ? `${whereClause} AND emisor_ruc IS NOT NULL AND emisor_ruc != ''` : 'WHERE emisor_ruc IS NOT NULL AND emisor_ruc != ""';
       const [emisoresActivos] = await executeQuery(`
         SELECT COUNT(DISTINCT emisor_ruc) as count FROM facturas 
-        WHERE emisor_ruc IS NOT NULL AND emisor_ruc != ''
-      `);
+        ${emisoresWhere}
+      `, params);
 
       // Calcular alertas
       const alertas = await this.getAlertas();
@@ -129,8 +141,17 @@ class DashboardService {
   }
 
   // Obtener datos para gráficos
-  async getCharts() {
+  async getCharts(filtros = {}) {
     try {
+      // Construir filtro WHERE para multi-tenant
+      let whereClause = '';
+      const params = [];
+      if (filtros.empresa_id !== undefined && filtros.empresa_id !== null) {
+        whereClause = 'WHERE empresa_id = ?';
+        params.push(filtros.empresa_id);
+      }
+
+      const fechaWhere = whereClause ? `${whereClause} AND fecha_factura >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)` : 'WHERE fecha_factura >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)';
       // Facturas por mes (últimos 12 meses)
       const facturasPorMes = await executeQuery(`
         SELECT 
@@ -138,12 +159,13 @@ class DashboardService {
           COUNT(*) as cantidad,
           SUM(total) as monto_total
         FROM facturas 
-        WHERE fecha_factura >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
+        ${fechaWhere}
         GROUP BY DATE_FORMAT(fecha_factura, '%Y-%m')
         ORDER BY mes
-      `);
+      `, params);
 
       // Top 10 emisores por volumen
+      const topEmisoresWhere = whereClause ? `${whereClause} AND emisor_nombre IS NOT NULL AND emisor_nombre != ''` : 'WHERE emisor_nombre IS NOT NULL AND emisor_nombre != ""';
       const topEmisores = await executeQuery(`
         SELECT 
           emisor_nombre,
@@ -151,46 +173,48 @@ class DashboardService {
           COUNT(*) as cantidad_facturas,
           SUM(total) as monto_total
         FROM facturas 
-        WHERE emisor_nombre IS NOT NULL AND emisor_nombre != ''
+        ${topEmisoresWhere}
         GROUP BY emisor_ruc, emisor_nombre
         ORDER BY cantidad_facturas DESC
         LIMIT 10
-      `);
+      `, params);
 
       // Distribución por estado
       const distribucionEstado = await executeQuery(`
         SELECT 
           estado,
           COUNT(*) as cantidad,
-          ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM facturas)), 2) as porcentaje
+          ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM facturas ${whereClause})), 2) as porcentaje
         FROM facturas 
+        ${whereClause}
         GROUP BY estado
-      `);
+      `, params);
 
       // Actividad por día de la semana
+      const actividadWhere = whereClause ? `${whereClause} AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)` : 'WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
       const actividadSemanal = await executeQuery(`
         SELECT 
           DAYNAME(created_at) as dia,
           DAYOFWEEK(created_at) as dia_num,
           COUNT(*) as cantidad
         FROM facturas 
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        ${actividadWhere}
         GROUP BY DAYOFWEEK(created_at), DAYNAME(created_at)
         ORDER BY dia_num
-      `);
+      `, params);
 
       // Tendencia de confianza OCR
+      const tendenciaWhere = whereClause ? `${whereClause} AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND confianza_ocr IS NOT NULL` : 'WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND confianza_ocr IS NOT NULL';
       const tendenciaOCR = await executeQuery(`
         SELECT 
           DATE_FORMAT(created_at, '%Y-%m-%d') as fecha,
           AVG(confianza_ocr) as confianza_promedio,
           COUNT(*) as total_facturas
         FROM facturas 
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
-        AND confianza_ocr IS NOT NULL
+        ${tendenciaWhere}
         GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
         ORDER BY fecha
-      `);
+      `, params);
 
       return {
         facturas_por_mes: facturasPorMes.map(row => ({
@@ -229,10 +253,16 @@ class DashboardService {
   // Obtener métricas específicas con filtros
   async getMetrics(filtros = {}) {
     try {
-      const { fechaInicio, fechaFin, emisorRuc } = filtros;
+      const { fechaInicio, fechaFin, emisorRuc, empresa_id } = filtros;
       
       let whereClause = 'WHERE 1=1';
       let params = [];
+
+      // Aplicar filtro multi-tenant si existe empresa_id
+      if (empresa_id !== undefined && empresa_id !== null) {
+        whereClause += ' AND empresa_id = ?';
+        params.push(empresa_id);
+      }
 
       if (fechaInicio) {
         whereClause += ' AND fecha_factura >= ?';

@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const reporteController = require('../controllers/reporteController');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { applyEmpresaFilter } = require('../middleware/empresaFilter');
 const rateLimiter = require('../middleware/rateLimiter');
 
-// Todas las rutas requieren autenticación
+// Todas las rutas requieren autenticación y filtro multi-tenant
 router.use(authenticateToken);
+router.use(applyEmpresaFilter);
 
 // Rutas de reportes
 router.get('/dashboard', reporteController.getDashboardReportes);

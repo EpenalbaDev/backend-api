@@ -16,6 +16,7 @@ const emisorRoutes = require('./routes/emisores');
 const reporteRoutes = require('./routes/reportes');
 const busquedaRoutes = require('./routes/busqueda');
 const empresaRoutes = require('./routes/empresas');
+const adminRoutes = require('./routes/admin');
 const docsRoutes = require('./routes/docs');
 
 const app = express();
@@ -71,7 +72,8 @@ app.get('/health', (req, res) => {
       emisores: '/api/v1/emisores',
       reportes: '/api/v1/reportes',
       busqueda: '/api/v1/busqueda',
-      empresas: '/api/v1/empresas'
+      empresas: '/api/v1/empresas',
+      admin: '/api/v1/admin'
     }
   });
 });
@@ -87,6 +89,7 @@ app.use('/api/v1/emisores', emisorRoutes);
 app.use('/api/v1/reportes', reporteRoutes);
 app.use('/api/v1/busqueda', busquedaRoutes);
 app.use('/api/v1/empresas', empresaRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Ruta 404
 app.use('*', (req, res) => {

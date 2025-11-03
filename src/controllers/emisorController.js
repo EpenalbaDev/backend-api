@@ -22,6 +22,10 @@ class EmisorController {
         });
       }
 
+      // Aplicar filtro multi-tenant desde middleware
+      if (req.empresaFilter && req.empresaFilter.empresa_id !== undefined) {
+        value.empresa_id = req.empresaFilter.empresa_id;
+      }
       const result = await emisorService.getEmisores(value);
 
       res.json({

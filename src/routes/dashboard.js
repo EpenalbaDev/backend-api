@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const dashboardController = require('../controllers/dashboardController');
 const { authenticateToken } = require('../middleware/auth');
+const { applyEmpresaFilter } = require('../middleware/empresaFilter');
 
-// Todas las rutas requieren autenticación
+// Todas las rutas requieren autenticación y filtro multi-tenant
 router.use(authenticateToken);
+router.use(applyEmpresaFilter);
 
 // Rutas del dashboard
 router.get('/overview', dashboardController.getOverview);

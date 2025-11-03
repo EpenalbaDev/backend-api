@@ -16,6 +16,7 @@ router.get('/:id/usuarios', empresaController.getUsuariosByEmpresa);
 // Rutas que requieren permisos de admin
 router.post('/', requireRole(['admin']), empresaController.createEmpresa);
 router.put('/:id', requireRole(['admin']), empresaController.updateEmpresa);
+router.post('/:empresaId/usuarios/invite', requireRole(['admin']), empresaController.inviteUsuario);
 
 module.exports = router;
 

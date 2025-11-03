@@ -12,6 +12,7 @@ class EmpresaService {
         search,
         activo,
         plan,
+        empresa_id,
         sortBy = 'created_at',
         sortOrder = 'DESC'
       } = filtros;
@@ -34,6 +35,12 @@ class EmpresaService {
       if (plan) {
         whereConditions.push('e.plan = ?');
         params.push(plan);
+      }
+
+      // Filtro por empresa_id (para admin que solo ve su empresa)
+      if (empresa_id) {
+        whereConditions.push('e.id = ?');
+        params.push(empresa_id);
       }
 
       const whereClause = whereConditions.length > 0 
@@ -202,12 +209,19 @@ class EmpresaService {
   }
 
   // Actualizar empresa
-  async updateEmpresa(id, empresaData) {
+  async updateEmpresa(id, empresaData, currentUser = null) {
     try {
       // Verificar que la empresa existe
       const empresa = await Empresa.findById(id);
       if (!empresa) {
         throw new Error('Empresa no encontrada');
+      }
+
+      // Validar permisos si se proporciona currentUser
+      if (currentUser && currentUser.rol !== 'super_admin') {
+        if (currentUser.empresa_id !== id) {
+          throw new Error('No tienes permisos para actualizar esta empresa');
+        }
       }
 
       // Si se actualiza el RUC, verificar que no existe otro con ese RUC
@@ -356,6 +370,63 @@ class EmpresaService {
 
     } catch (error) {
       console.error('Error en countEmpresas:', error);
+      throw error;
+    }
+  }
+
+  // Invitar usuario a una empresa
+  async inviteUsuario(empresaId, userData, currentUser) {
+    try {
+      const { nombre, apellido, email, password, rol = 'usuario' } = userData;
+
+      // 1. Validar permisos
+      // Super admin puede invitar a cualquier empresa
+      // Admin solo puede invitar a su propia empresa
+      if (currentUser.rol !== 'super_admin') {
+        if (currentUser.empresa_id !== empresaId) {
+          throw new Error('No tienes permisos para invitar usuarios a esta empresa');
+        }
+      }
+
+      // 2. Validar que la empresa existe y está activa
+      const empresa = await Empresa.findById(empresaId);
+      if (!empresa || !empresa.activo) {
+        throw new Error('La empresa no existe o está inactiva');
+      }
+
+      // 3. Validar que el email no exista
+      const existingUsers = await executeQuery(
+        'SELECT id FROM usuarios WHERE email = ?',
+        [email.toLowerCase()]
+      );
+
+      if (existingUsers.length > 0) {
+        throw new Error('El email ya está registrado');
+      }
+
+      // 4. Hash password
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      // 5. Crear usuario
+      const result = await executeQuery(
+        'INSERT INTO usuarios (empresa_id, nombre, apellido, email, password, rol) VALUES (?, ?, ?, ?, ?, ?)',
+        [empresaId, nombre, apellido, email.toLowerCase(), hashedPassword, rol]
+      );
+
+      // 6. Obtener usuario creado
+      const usuarioCreado = await executeQuery(
+        'SELECT id, empresa_id, nombre, apellido, email, rol, activo, created_at FROM usuarios WHERE id = ?',
+        [result.insertId]
+      );
+
+      return {
+        ...usuarioCreado[0],
+        activo: usuarioCreado[0].activo === 1
+      };
+
+    } catch (error) {
+      console.error('Error en inviteUsuario:', error);
       throw error;
     }
   }

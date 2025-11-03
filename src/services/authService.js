@@ -207,6 +207,98 @@ class AuthService {
     await this.logAccess(userId, null, 'logout', ipAddress, userAgent);
     return { success: true };
   }
+
+  // Registro público de nuevos clientes
+  async register(registerData, ipAddress, userAgent) {
+    const { executeQuery, executeTransaction } = require('../config/database');
+    const Empresa = require('../models/Empresa');
+    
+    try {
+      const {
+        nombre,
+        apellido,
+        email,
+        password,
+        empresa_nombre,
+        empresa_ruc,
+        empresa_direccion,
+        empresa_telefono
+      } = registerData;
+
+      // 1. Validar que el email no exista
+      const existingUsers = await executeQuery(
+        'SELECT id FROM usuarios WHERE email = ?',
+        [email.toLowerCase()]
+      );
+
+      if (existingUsers.length > 0) {
+        throw new Error('El email ya está registrado');
+      }
+
+      // 2. Validar que el RUC no exista
+      const existingEmpresa = await Empresa.findByRuc(empresa_ruc);
+      if (existingEmpresa) {
+        throw new Error('El RUC ya está registrado');
+      }
+
+      // 3. Generar email de procesamiento
+      const email_procesamiento = `${empresa_ruc}@facturas.grupocodev.com`;
+
+      // 4. Hash password
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      // 5. Crear empresa y usuario en transacción
+      const queries = [
+        {
+          query: `
+            INSERT INTO empresas (nombre, ruc, email_procesamiento, direccion, telefono, activo, plan)
+            VALUES (?, ?, ?, ?, ?, TRUE, 'basico')
+          `,
+          params: [
+            empresa_nombre,
+            empresa_ruc,
+            email_procesamiento,
+            empresa_direccion || null,
+            empresa_telefono || null
+          ]
+        }
+      ];
+
+      const results = await executeTransaction(queries);
+      const empresaId = results[0].insertId;
+
+      // 6. Crear usuario
+      const userResult = await executeQuery(
+        'INSERT INTO usuarios (empresa_id, nombre, apellido, email, password, rol) VALUES (?, ?, ?, ?, ?, ?)',
+        [empresaId, nombre, apellido, email.toLowerCase(), hashedPassword, 'admin']
+      );
+
+      const userId = userResult.insertId;
+
+      // 7. Generar token JWT
+      const token = this.generateToken(userId, email.toLowerCase(), 'admin');
+
+      // 8. Log de acceso
+      await this.logAccess(userId, email.toLowerCase(), 'registro_exitoso', ipAddress, userAgent);
+
+      // 9. Retornar resultado
+      return {
+        token,
+        user: {
+          id: userId,
+          empresa_id: empresaId,
+          nombre,
+          apellido,
+          email: email.toLowerCase(),
+          rol: 'admin'
+        }
+      };
+
+    } catch (error) {
+      console.error('Error en registro:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new AuthService();
